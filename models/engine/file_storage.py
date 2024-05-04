@@ -47,4 +47,4 @@ class FileStorage:
                         converted_instance = converted_class(**value)
                         FileStorage.__objects[key] = converted_instance
                 except Exception:
-                    pass
+                    "error relaoding JSON file"
