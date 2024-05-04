@@ -23,7 +23,7 @@ class TestFileStorage(unittest.TestCase):
         self.r = Review()
         self.storage = FileStorage()
         self.storage.save()
-        if os.path.exits("file.json"):
+        if os.path.exists("file.json"):
             pass
         else:
             os.mknod("file.json")
@@ -36,11 +36,11 @@ class TestFileStorage(unittest.TestCase):
         del self.p
         del self.r
         del self.storage
-        if os.path.exits("file.json"):
+        if os.path.exists("file.json"):
             os.remove("file.json")
     def test_all(self):
         val = self.storage.all()
-        self.asserIsNotNone(val)
+        self.assertTrue(val)
         self.assertEqual(type(val), dict)
     def test_new(self):
         val = self.storage.all()
