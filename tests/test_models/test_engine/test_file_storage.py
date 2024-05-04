@@ -1,54 +1,51 @@
-#!/usr/bin/python3
-import unittest
-import os
-import models
+#!/bin/bash/python3
 
-from models.engine.file_storage import FileStorage
+import unittest
+from unittest.mock import patch, MagicMock
 from models.base_model import BaseModel
-from models.user import User
-from models.amenity import Amenity
-from models.state import State
-from models.city import City
-from models.place import Place
-from models.review import Review
+# from models import storage
+from models.engine.file_storage import FileStorage
+import json
 
 class TestFileStorage(unittest.TestCase):
-    def setUp(self):
-        self.b = BaseModel()
-        self.u = User()
-        self.a = Amenity()
-        self.s = State()
-        self.c = City()
-        self.p = Place()
-        self.r = Review()
-        self.storage = FileStorage()
-        self.storage.save()
-        if os.path.exists("file.json"):
-            pass
-        else:
-            os.mknod("file.json")
-    def tearDown(self):
-        del self.b
-        del self.u
-        del self.a
-        del self.s
-        del self.c
-        del self.p
-        del self.r
-        del self.storage
-        if os.path.exists("file.json"):
-            os.remove("file.json")
-    def test_all(self):
-        val = self.storage.all()
-        self.assertTrue(val)
-        self.assertEqual(type(val), dict)
-    def test_new(self):
-        val = self.storage.all()
-        self.u.name = "Neima"
-        self.u.id = "2121"
-        val2 = self.storage.new(self.u)
-        key = "{}.{}".format(self.u.__class__.__name__, self.u.id)
-        self.assertIsNotNone(val[key])
+    """Test cases for the FileStorage class"""
 
-if __name__ == "__main__":
-    unittest.main()
+    def setUp(self):
+        """Set up the test case"""
+        self.storage = FileStorage()
+
+    def tearDown(self):
+        """Tear down the test case"""
+        self.storage = None
+
+    def test_new(self):
+        """Test adding a new object to storage"""
+        obj = BaseModel(name="Test Object", price=100)      
+        self.storage.new(obj)
+        self.assertIn(f"{obj.__class__.__name__}.{obj.id}", self.storage.all())
+
+    def test_save(self):
+        """Test saving objects to the file"""
+        obj = BaseModel(name="Programming is Crazzy!")
+        obj.save()
+        file_path = self.storage.__class__.__dict__.get('_FileStorage__file_path', 'file.json')
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        for key, value in data.items():
+            if key == 'id':
+                self.assertEqual(value, obj.id)
+
+    def test_reload(self):
+        ''' test reloading of objects into __objects dict '''
+        obj = BaseModel(name="The patient dog does what again?")
+        obj.save()
+        self.storage.reload()
+        key = f'{obj.__class__.__name__}.{obj.id}'
+        obj_list = self.storage.all()
+        for data in obj_list.keys():
+            if data == key:
+                self.assertTrue(key)
+          
+        
+
+

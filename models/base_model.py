@@ -1,70 +1,51 @@
-#!/usr/bin/python3
-""" the baseModel module """
+#!/bin/bash/python3
 
 import uuid
 from datetime import datetime
-import models
+import models 
 
 class BaseModel:
-    """ This contains Airbnb base class upon which other classes inherit from """
+    ''' root class upon other models inherit from '''
 
     def __init__(self, *args, **kwargs):
-        """ Initializes both instance and inherited attributes """
-        time_format = "%Y-%m-%dT%H:%M:%S.%f"
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+
         if kwargs:
             for key, value in kwargs.items():
-                if key == "__class__":
-                    continue
-                elif key == "created_at" or key == "updated_at":
-                    setattr(self, key, datetime.strptime(value, time_format))
-                else:
+                if key != '__class__':
+                    if key in ('created_at', 'updated_at'):
+                        value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
                     setattr(self, key, value)
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
 
         models.storage.new(self)
-
+    
     def __str__(self):
-        """ Outputs in the string format. This method is called by either str or print """
-        return f"[{self.__class__.__name__}], ({self.id}), {self.__dict__}"
+        ''' formats instance output '''
+        return f'[{self.__class__.__name__}], ({self.id}), {self.__dict__}'
 
     def save(self):
-        """ This method saves the updated_at attribute with the current date """
+        ''' saves creation and modification of instances '''
         self.updated_at = datetime.now()
         models.storage.save()
 
     def to_dict(self):
-        """ This function returns a dictionary containing keys/values of the object instance """
-        obj_dict = self.__dict__.copy()
-        obj_dict["__class__"] = self.__class__.__name__
-        obj_dict["created_at"] = self.created_at.isoformat()
-        obj_dict["updated_at"] = self.updated_at.isoformat()
-        return obj_dict
+        ''' serilizes objects to dictionary '''
+        obj = self.__dict__.copy()
+        obj['__class__'] = self.__class__.__name__
+        obj['created_at'] = self.created_at.isoformat()
+        obj['updated_at'] = self.updated_at.isoformat()
+        return obj
 
-
-if __name__ == "__main__":
-
-    my_model = BaseModel()
-    my_model.name = "Josh model"
-    my_model.my_number = 89
-    # print(my_model)
-    my_model.save()
-    # print(my_model)
-    print(models.storage.all())
-    # my_model_json = my_model.to_dict()
-    # print(my_model_json)
-    # print("JSON of my_model:")
-    # for key in my_model_json.keys():
-    #     print("\t{}: ({}) - {}".format(key, type(my_model_json[key]), my_model_json[key]))
-
-    # print("--")
-    # my_new_model = BaseModel(**my_model_json)
-    # print(my_new_model.id)
-    # print(my_new_model)
-    # print(type(my_new_model.created_at))
-
-    # print("--")
-    # print(my_model is my_new_model)
-
+# if __name__ == "__main__":
+#     obj = BaseModel(name="Benjamin Model")
+#     # print(f'name: {obj.name}, \tcreated: {obj.created_at}, \tupdated: {obj.updated_at}')
+#     # holder = obj.to_dict()
+#     # i = 0
+#     # for key, value in holder.items():
+#     #     i += 1
+#     #     print(f'{type(value)}')
+#     # print("loop count:", i)
+#     # print(obj.id)
+#     obj.save()
